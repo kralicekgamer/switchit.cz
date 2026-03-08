@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-univo-bg: #F8F9FA;
+  --color-univo-bg-panel: #FFFFFF;
+  --color-univo-text: #212529;
+  --color-univo-text-muted: #868E96;
+  --color-univo-active: #40C057;
+  --color-univo-active-blue: #339AF0;
+  --color-univo-error: #FA5252;
+  --color-univo-warning: #FD7E14;
+  --color-univo-border: #E9ECEF;
+  --color-univo-shadow: rgba(0, 0, 0, 0.05);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-univo-bg);
+  color: var(--color-univo-text);
+  overflow: hidden; /* Zamezí scrollování stránky v prohlížeči, hra bude full-screen */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Skrýt defaultní scrollbary ale nechat možnost posunu v panelech */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-univo-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-univo-text-muted);
+}
+
+@keyframes flow {
+  from { stroke-dashoffset: 20; }
+  to { stroke-dashoffset: 0; }
+}
