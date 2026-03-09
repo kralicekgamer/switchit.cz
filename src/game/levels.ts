@@ -120,9 +120,9 @@ export const levels: Level[] = [
       { id: 'pc2', type: 'pc', name: 'Smart TV', position: { x: 80, y: 80}, ports: [{ id: 'eth', type: 'ETH', label: 'ETH' }], data: getClientSettings() as any }
     ],
     checkWinCondition: (_, cables) => 
-      hasLink(cables, 'gw', 'l1', 'sw', 'p1') && 
-      hasLink(cables, 'sw', 'p2', 'pc1', 'eth') && 
-      hasLink(cables, 'sw', 'p3', 'pc2', 'eth')
+      hasLink(cables, 'gw', 'l1', 'sw', null) && 
+      hasLink(cables, 'sw', null, 'pc1', 'eth') && 
+      hasLink(cables, 'sw', null, 'pc2', 'eth')
   },
   {
     id: '3-2', chapter: 3, title: 'Rychlost linky',
@@ -189,7 +189,7 @@ export const levels: Level[] = [
       { id: 'gw', type: 'router', name: 'Univo Router', position: { x: 30, y: 50}, ports: [...R5], data: getRouterSettings() as any },
       { id: 'ap', type: 'ap', name: 'Univo AP', position: { x: 70, y: 50}, ports: [{ id: 'eth', type: 'ETH', label: 'ETH' }], data: getApSettings({ channel: { type: 'select', label: 'Kanál', value: '1', options: [{value:'1',label:'1'}, {value:'6',label:'6'}, {value:'11',label:'11'}], category: 'wifi' } }) as any }
     ],
-    checkWinCondition: (devices) => devices.find(d => d.id === 'ap')?.data?.channel.value === '6'
+    checkWinCondition: (devices, cables) => devices.find(d => d.id === 'ap')?.data?.channel.value === '6' && hasLink(cables, 'gw', 'l1', 'ap', 'eth')
   },
 
   // --- KAPITOLA 5: PoE (Napájení po ethernetu) ---
@@ -205,28 +205,11 @@ export const levels: Level[] = [
       { id: 'ap', type: 'ap', name: 'Univo AP', position: { x: 80, y: 50}, ports: [{ id: 'eth', type: 'PoE', label: 'ETH' }], data: getApSettings() as any }
     ],
     checkWinCondition: (_, cables) => 
-      hasLink(cables, 'sw', 'p1', 'poe', 'in') && 
+      hasLink(cables, 'sw', null, 'poe', 'in') && 
       hasLink(cables, 'poe', 'out', 'ap', 'eth')
   },
   {
-    id: '5-2', chapter: 5, title: 'PoE Switch',
-    description: 'Injektory jsou nepraktické a zabírají místo v zásuvkách. Lepším řešením je PoE Switch, který má napájení zabudované přímo v sobě. Zapojme kamery přímo do něj.',
-    task: 'Vyhoď injektory a zapoj obě kamery rovnou do PoE switche. Nezapomeň pak PoE na portech zapnout v nastavení!',
-    explanation: 'PoE switch dokáže napájet mnoho zařízení najednou. Musíš si ale hlídat celkový "PoE Budget" – tedy kolik Wattů switch zvládne dodat celkem.',
-    availableTools: ['blue-cable'],
-    initialDevices: [
-      { id: 'sw', type: 'switch', name: 'Univo Switch', position: { x: 20, y: 50}, ports: [...S8P], data: getSwitchSettings() as any },
-      { id: 'cam1', type: 'camera', name: 'Kamera 1', position: { x: 70, y: 30}, ports: [{ id: 'eth', type: 'PoE', label: 'ETH' }], data: getCameraSettings() as any },
-      { id: 'cam2', type: 'camera', name: 'Kamera 2', position: { x: 70, y: 70}, ports: [{ id: 'eth', type: 'PoE', label: 'ETH' }], data: getCameraSettings() as any }
-    ],
-    checkWinCondition: (devices, cables) => 
-      hasLink(cables, 'sw', 'p1', 'cam1', 'eth') && 
-      hasLink(cables, 'sw', 'p2', 'cam2', 'eth') &&
-      !!devices.find(d => d.id === 'sw')?.data?.p1poe.value &&
-      !!devices.find(d => d.id === 'sw')?.data?.p2poe.value
-  },
-  {
-    id: '5-3', chapter: 5, title: 'Zapnutí PoE portu',
+    id: '5-2', chapter: 5, title: 'Zapnutí PoE portu',
     description: 'PoE switch máš, ale kamera stále nejede. U některých switchů musíš napájení na konkrétním portu ručně povolit v administraci z bezpečnostních důvodů.',
     task: 'V nastavení switche zapni "Port 1 - PoE Output".',
     explanation: 'Aktivní PoE (802.3af/at) je chytré – switch se nejdříve zeptá zařízení, jestli napájení chce. Pokud ale máš starší pasivní PoE, switch tam "pouští proud" natvrdo, což může zničit zařízení, která na to nejsou stavěná.',
@@ -237,6 +220,23 @@ export const levels: Level[] = [
     ],
     initialCables: [{ id: 'c1', fromDevice: 'sw', fromPort: 'p1', toDevice: 'cam', toPort: 'eth'}],
     checkWinCondition: (devices) => !!devices.find(d => d.id === 'sw')?.data?.p1poe.value
+  },
+  {
+    id: '5-3', chapter: 5, title: 'PoE Switch',
+    description: 'Injektory jsou nepraktické a zabírají místo v zásuvkách. Lepším řešením je PoE Switch, který má napájení zabudované přímo v sobě. Zapojme kamery přímo do něj.',
+    task: 'Vyhoď injektory a zapoj obě kamery rovnou do PoE switche. Nezapomeň pak PoE na portech zapnout v nastavení!',
+    explanation: 'PoE switch dokáže napájet mnoho zařízení najednou. Musíš si ale hlídat celkový "PoE Budget" – tedy kolik Wattů switch zvládne dodat celkem.',
+    availableTools: ['blue-cable'],
+    initialDevices: [
+      { id: 'sw', type: 'switch', name: 'Univo Switch', position: { x: 20, y: 50}, ports: [...S8P], data: getSwitchSettings() as any },
+      { id: 'cam1', type: 'camera', name: 'Kamera 1', position: { x: 70, y: 30}, ports: [{ id: 'eth', type: 'PoE', label: 'ETH' }], data: getCameraSettings() as any },
+      { id: 'cam2', type: 'camera', name: 'Kamera 2', position: { x: 70, y: 70}, ports: [{ id: 'eth', type: 'PoE', label: 'ETH' }], data: getCameraSettings() as any }
+    ],
+    checkWinCondition: (devices, cables) => 
+      hasLink(cables, 'sw', null, 'cam1', 'eth') && 
+      hasLink(cables, 'sw', null, 'cam2', 'eth') &&
+      !!devices.find(d => d.id === 'sw')?.data?.p1poe.value &&
+      !!devices.find(d => d.id === 'sw')?.data?.p2poe.value
   },
 
   // --- KAPITOLA 6: Strukturovaná kabeláž ---
@@ -254,7 +254,7 @@ export const levels: Level[] = [
     ],
     checkWinCondition: (_, cables) => 
       hasLink(cables, 'pc', 'eth', 'wall', 'p1') && 
-      hasLink(cables, 'pp', 'p1', 'sw', 'p1')
+      hasLink(cables, 'pp', 'p1', 'sw', null)
   },
   {
     id: '6-2', chapter: 6, title: 'Hledání správného portu',
@@ -266,7 +266,7 @@ export const levels: Level[] = [
       { id: 'pp', type: 'patchpanel', name: 'Patch Panel', position: { x: 30, y: 50}, ports: [...PP12], data: getPatchPanelSettings() as any },
       { id: 'sw', type: 'switch', name: 'Univo Switch', position: { x: 70, y: 50}, ports: [...S8], data: getSwitchSettings() as any }
     ],
-    checkWinCondition: (_, cables) => hasLink(cables, 'pp', 'p12', 'sw', 'p1')
+    checkWinCondition: (_, cables) => hasLink(cables, 'pp', 'p12', 'sw', null)
   },
   {
     id: '6-3', chapter: 6, title: 'Propojení dvou místností',
@@ -339,8 +339,8 @@ export const levels: Level[] = [
       { id: 'ctl', type: 'server', name: 'Univo Controller', position: { x: 50, y: 15}, ports: [], data: getControllerSettings({ adoption: { type: 'toggle', label: 'Automatická Adopce', value: false, category: 'system' } }) as any }
     ],
     checkWinCondition: (devices, cables) => 
-      hasLink(cables, 'gw', 'l1', 'sw', 'p1') && 
-      hasLink(cables, 'sw', 'p2', 'ap', 'e1') &&
+      hasLink(cables, 'gw', 'l1', 'sw', null) && 
+      hasLink(cables, 'sw', null, 'ap', 'e1') &&
       !!devices.find(d => d.id === 'ctl')?.data?.adoption.value
   },
   {
@@ -392,7 +392,7 @@ export const levels: Level[] = [
       { id: 'sw1', type: 'switch', name: 'Univo Switch', position: { x: 50, y: 50}, ports: [...S8], data: getSwitchSettings() as any },
       { id: 'sw2', type: 'switch', name: 'Univo Switch', position: { x: 85, y: 50}, ports: [...S8], data: getSwitchSettings() as any }
     ],
-    checkWinCondition: (_, cables) => hasLink(cables, 'gw', 'l1', 'sw1', 'p1') && hasLink(cables, 'sw1', 'p2', 'sw2', 'p1')
+    checkWinCondition: (_, cables) => hasLink(cables, 'gw', 'l1', 'sw1', null) && hasLink(cables, 'sw1', null, 'sw2', null)
   },
 
   // --- KAPITOLA 10: Firewall & brána ---

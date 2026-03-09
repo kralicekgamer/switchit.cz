@@ -1,9 +1,18 @@
 import type { DeviceDataField } from './types';
 
+const getCommonSettings = (type: string): Record<string, DeviceDataField> => ({
+  status: { type: 'info', label: 'Provozní Stav', value: 'Online', category: 'system' },
+  model: { type: 'info', label: 'Hardware Model', value: `Univo ${type.charAt(0).toUpperCase() + type.slice(1)} Pro`, category: 'system' },
+  serial: { type: 'info', label: 'Sériové číslo', value: Math.random().toString(36).substring(2, 10).toUpperCase(), category: 'system' },
+  firmware: { type: 'info', label: 'Firmware', value: 'v2.4.1-stable', category: 'system' },
+  ip: { type: 'info', label: 'IP Adresa', value: `192.168.1.${Math.floor(Math.random() * 254) + 1}`, category: 'network' },
+  mac: { type: 'info', label: 'MAC Adresa', value: Array.from({length:6}, () => Math.floor(Math.random()*256).toString(16).padStart(2, '0')).join(':').toUpperCase(), category: 'network' },
+});
+
 export const getRouterSettings = (overrides: Record<string, DeviceDataField> = {}) => {
   const base: Record<string, DeviceDataField> = {
+    ...getCommonSettings('Router'),
     status: { type: 'info', label: 'Provozní Stav', value: 'Online (Uptime 14d)', category: 'system' },
-    model: { type: 'info', label: 'Hardware Model', value: 'Univo Router Pro', category: 'system' },
     ssidEnabled: { type: 'toggle', label: 'Vysílat Wi-Fi (SSID)', value: true, category: 'wifi' },
     bandSelect: { type: 'select', label: 'Povolit Pásma', value: 'Dual-Band (Auto)', options: [{value:'Dual-Band (Auto)',label:'Dual-Band (Auto)'}, {value:'5 GHz',label:'Pouze 5 GHz'}, {value:'2.4 GHz',label:'Pouze 2.4 GHz'}], category: 'wifi' },
     nat: { type: 'toggle', label: 'NAT Překlad Adres', value: true, category: 'network' },
@@ -19,7 +28,7 @@ export const getRouterSettings = (overrides: Record<string, DeviceDataField> = {
 
 export const getSwitchSettings = (overrides: Record<string, DeviceDataField> = {}) => {
   const base: Record<string, DeviceDataField> = {
-    status: { type: 'info', label: 'Provozní Stav', value: 'Online', category: 'system' },
+    ...getCommonSettings('Switch'),
     temp: { type: 'info', label: 'Teplota Jádra', value: '42 °C', category: 'system' },
   };
 
@@ -33,6 +42,7 @@ export const getSwitchSettings = (overrides: Record<string, DeviceDataField> = {
 };
 
 export const getApSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('Access Point'),
   status: { type: 'info', label: 'Stav Mesh', value: 'Connected (Gbe)', category: 'system' },
   ssidEnabled: { type: 'toggle', label: 'Vysílat Wi-Fi (SSID)', value: true, category: 'wifi' },
   bandSelect: { type: 'select', label: 'Pásmo', value: 'Dual-Band (Auto)', options: [{value:'Dual-Band (Auto)',label:'Dual-Band'}, {value:'5 GHz',label:'5 GHz'}, {value:'2.4 GHz',label:'2.4 GHz'}], category: 'wifi' },
@@ -43,36 +53,36 @@ export const getApSettings = (overrides: Record<string, DeviceDataField> = {}) =
 
 export const getControllerSettings = (overrides: Record<string, DeviceDataField> = {}) => {
   const base: Record<string, DeviceDataField> = {
+    ...getCommonSettings('Controller'),
     status: { type: 'info', label: 'Uptime', value: '12d 4h', category: 'system' },
     adoption: { type: 'toggle', label: 'Automatická Adopce', value: true, category: 'system' },
   };
-
-  // 12 portů pro patch panel logiku v controlleru (pokud by se vázalo)
-  for (let i = 1; i <= 12; i++) {
-    base[`p${i}label`] = { type: 'info', label: `Dírka ${i}`, value: 'Ready', category: 'ports' };
-  }
 
   return { ...base, ...overrides };
 };
 
 export const getClientSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('Client'),
+  model: { type: 'info', label: 'Hardware Model', value: 'Univo Desktop PC', category: 'system' },
   status: { type: 'info', label: 'Signál', value: '95%', category: 'wifi' },
   ...overrides
 });
 
 export const getIspSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('ISP Gateway'),
   status: { type: 'info', label: 'Link State', value: 'Up', category: 'network' },
   speed: { type: 'info', label: 'Sjednaná rychlost', value: '1000/1000 Mbps', category: 'network' },
   ...overrides
 });
 
 export const getGenericSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
-  status: { type: 'info', label: 'Stav', value: 'Online', category: 'system' },
+  ...getCommonSettings('Device'),
   ...overrides
 });
 
 export const getPatchPanelSettings = (overrides: Record<string, DeviceDataField> = {}) => {
   const base: Record<string, DeviceDataField> = {
+    ...getCommonSettings('Patch Panel'),
     status: { type: 'info', label: 'Typ', value: 'Cat6 Patch Panel', category: 'system' },
   };
   for (let i = 1; i <= 12; i++) {
@@ -82,6 +92,7 @@ export const getPatchPanelSettings = (overrides: Record<string, DeviceDataField>
 };
 
 export const getPoEInjectorSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('PoE Injector'),
   status: { type: 'info', label: 'Stav', value: 'Napájí', category: 'system' },
   poeOutput: { type: 'toggle', label: 'PoE Výstup (802.3af)', value: true, category: 'ports' },
   wattage: { type: 'info', label: 'Max Výkon', value: '30W (802.3at)', category: 'system' },
@@ -89,6 +100,7 @@ export const getPoEInjectorSettings = (overrides: Record<string, DeviceDataField
 });
 
 export const getDockerSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('NAS Server'),
   status: { type: 'info', label: 'Docker Engine', value: 'Running', category: 'system' },
   containerRunning: { type: 'toggle', label: 'Univo Controller (kontejner)', value: true, category: 'system' },
   informUrl: { type: 'select', label: 'Inform URL', value: 'Nenastaveno', options: [{value:'Nenastaveno',label:'Nenastaveno'}, {value:'http://controller:8080/inform',label:'http://controller:8080/inform'}], category: 'network' },
@@ -96,8 +108,8 @@ export const getDockerSettings = (overrides: Record<string, DeviceDataField> = {
 });
 
 export const getFirewallSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('Firewall'),
   status: { type: 'info', label: 'Provozní Stav', value: 'Online', category: 'system' },
-  model: { type: 'info', label: 'Hardware Model', value: 'Univo Security Gateway', category: 'system' },
   wanInBlock: { type: 'toggle', label: 'WAN-IN: Blokovat vše', value: false, category: 'network' },
   portForward: { type: 'toggle', label: 'Port Forward (25565 → Server)', value: false, category: 'network' },
   lanIsolation: { type: 'toggle', label: 'LAN Izolace (VLAN ↔ VLAN)', value: false, category: 'network' },
@@ -107,18 +119,22 @@ export const getFirewallSettings = (overrides: Record<string, DeviceDataField> =
 });
 
 export const getPhoneSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('Smartphone'),
+  model: { type: 'info', label: 'Hardware Model', value: 'Univo Phone', category: 'system' },
   status: { type: 'info', label: 'Signál Wi-Fi', value: 'Skvělý', category: 'wifi' },
   band: { type: 'select', label: 'Preferované pásmo', value: 'Auto', options: [{value:'Auto',label:'Auto'}, {value:'5 GHz',label:'5 GHz'}, {value:'2.4 GHz',label:'2.4 GHz'}], category: 'wifi' },
   ...overrides
 });
 
 export const getCameraSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('Camera'),
   status: { type: 'info', label: 'Stav', value: 'Offline (Bez napájení)', category: 'system' },
   poeRequired: { type: 'info', label: 'Napájení', value: 'Vyžaduje PoE (802.3af)', category: 'system' },
   ...overrides
 });
 
 export const getIoTSettings = (overrides: Record<string, DeviceDataField> = {}) => ({
+  ...getCommonSettings('IoT Device'),
   status: { type: 'info', label: 'Stav', value: 'Online', category: 'system' },
   network: { type: 'info', label: 'Připojeno na', value: 'Hlavní síť (nebezpečné!)', category: 'network' },
   ...overrides

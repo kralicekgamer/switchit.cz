@@ -9,7 +9,7 @@ interface DeviceNodeProps {
 }
 
 export default function DeviceNode({ device, onPortClick, selectedPort, onOpenSettings, connectedPorts }: DeviceNodeProps) {
-  const hasSettings = (device.data && Object.keys(device.data).length > 0) || device.type === 'internet';
+  const hasSettings = ((device.data && Object.keys(device.data).length > 0) || device.type === 'internet') && device.type !== 'patchpanel';
   const isSelected = selectedPort?.deviceId === device.id;
 
   // Internet type has a special circular look
@@ -51,6 +51,7 @@ export default function DeviceNode({ device, onPortClick, selectedPort, onOpenSe
     );
   }
 
+  // Main Chassis for all other devices
   return (
     <div
       className="absolute"
@@ -106,58 +107,60 @@ export default function DeviceNode({ device, onPortClick, selectedPort, onOpenSe
         </div>
 
         {/* Ports Panel */}
-        <div className="p-3 flex flex-wrap gap-3 justify-center bg-white rounded-b-xl">
-          {device.ports.map(port => {
-            const isPortConnected = connectedPorts?.includes(port.id);
-            const isPortSelected = selectedPort?.deviceId === device.id && selectedPort?.portId === port.id;
-            
-            return (
-              <div 
-                key={port.id} 
-                className="flex flex-col items-center gap-1"
-                onClick={(e) => { e.stopPropagation(); onPortClick(device.id, port.id); }}
-              >
-                {/* Port Type Indicator & PoE Active LED */}
-                <div className="flex gap-1 items-center">
-                  <div className={`w-3 h-1 rounded-full ${
-                    port.type === 'WAN' ? 'bg-[#ffd43b]' : 
-                    port.type === 'PoE' ? 'bg-[#40c057]' : 'bg-transparent'
-                  }`}></div>
-                  
-                  {/* Status Circle (Green if PoE active) */}
-                  {(() => {
-                    const isPoEActive = port.type === 'PoE' && (
-                      (device.type === 'poe-injector' && device.data?.poeOutput?.value === true && port.id === 'out') ||
-                      (device.data?.[port.id + 'poe']?.value === true)
-                    );
-                    
-                    if (isPoEActive) {
-                      return <div className="w-1.5 h-1.5 rounded-full bg-[#40c057] shadow-[0_0_3px_#40c057] animate-pulse"></div>;
-                    }
-                    return null;
-                  })()}
-                </div>
-
-                {/* RJ45 Connector */}
+        {device.ports.length > 0 && (
+          <div className="p-3 flex flex-wrap gap-3 justify-center bg-white rounded-b-xl">
+            {device.ports.map(port => {
+              const isPortConnected = connectedPorts?.includes(port.id);
+              const isPortSelected = selectedPort?.deviceId === device.id && selectedPort?.portId === port.id;
+              
+              return (
                 <div 
-                  className={`
-                    w-9 h-9 rounded-md border-2 flex flex-col items-center justify-end p-1 transition-all cursor-pointer shadow-inner
-                    ${isPortSelected ? 'border-[#339af0] bg-blue-50' : 
-                      isPortConnected ? 'border-[#40c057] bg-green-50' : 'border-[#dee2e6] bg-[#f8f9fa] hover:border-[#adb5bd]'}
-                  `}
+                  key={port.id} 
+                  className="flex flex-col items-center gap-1"
+                  onClick={(e) => { e.stopPropagation(); onPortClick(device.id, port.id); }}
                 >
-                  <div className="flex gap-0.5 mb-1">
-                    <div className={`w-1 h-0.5 rounded-full ${isPortConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-300'}`}></div>
-                    <div className={`w-1 h-0.5 rounded-full ${isPortConnected ? 'bg-yellow-400 opacity-50' : 'bg-gray-300'}`}></div>
+                  {/* Port Type Indicator & PoE Active LED */}
+                  <div className="flex gap-1 items-center">
+                    <div className={`w-3 h-1 rounded-full ${
+                      port.type === 'WAN' ? 'bg-[#ffd43b]' : 
+                      port.type === 'PoE' ? 'bg-[#40c057]' : 'bg-transparent'
+                    }`}></div>
+                    
+                    {/* Status Circle (Green if PoE active) */}
+                    {(() => {
+                      const isPoEActive = port.type === 'PoE' && (
+                        (device.type === 'poe-injector' && device.data?.poeOutput?.value === true && port.id === 'out') ||
+                        (device.data?.[port.id + 'poe']?.value === true)
+                      );
+                      
+                      if (isPoEActive) {
+                        return <div className="w-1.5 h-1.5 rounded-full bg-[#40c057] shadow-[0_0_3px_#40c057] animate-pulse"></div>;
+                      }
+                      return null;
+                    })()}
                   </div>
-                  <div className={`w-3 h-1 rounded-sm ${isPortConnected ? 'bg-[#40c057]' : 'bg-[#dee2e6]'}`}></div>
-                </div>
 
-                <span className="text-[9px] font-bold text-[#adb5bd] uppercase tracking-tighter">{port.label}</span>
-              </div>
-            );
-          })}
-        </div>
+                  {/* RJ45 Connector */}
+                  <div 
+                    className={`
+                      w-9 h-9 rounded-md border-2 flex flex-col items-center justify-end p-1 transition-all cursor-pointer shadow-inner
+                      ${isPortSelected ? 'border-[#339af0] bg-blue-50' : 
+                        isPortConnected ? 'border-[#40c057] bg-green-50' : 'border-[#dee2e6] bg-[#f8f9fa] hover:border-[#adb5bd]'}
+                    `}
+                  >
+                    <div className="flex gap-0.5 mb-1">
+                      <div className={`w-1 h-0.5 rounded-full ${isPortConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-300'}`}></div>
+                      <div className={`w-1 h-0.5 rounded-full ${isPortConnected ? 'bg-yellow-400 opacity-50' : 'bg-gray-300'}`}></div>
+                    </div>
+                    <div className={`w-3 h-1 rounded-sm ${isPortConnected ? 'bg-[#40c057]' : 'bg-[#dee2e6]'}`}></div>
+                  </div>
+
+                  <span className="text-[9px] font-bold text-[#adb5bd] uppercase tracking-tighter">{port.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

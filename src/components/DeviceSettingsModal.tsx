@@ -32,14 +32,6 @@ export default function DeviceSettingsModal({ device, onClose, onUpdate }: Devic
         </header>
 
         <div className="p-6 flex flex-col gap-6 overflow-y-auto max-h-[65vh]">
-          {/* Renderování IP/MAC infa na začátku pro realismus */}
-          {(device.ip || device.mac || device.model) && (
-            <div className="grid grid-cols-2 gap-3 mb-2 bg-[#f8f9fa] p-4 rounded-xl border border-[#e9ecef]">
-              {device.model && <div className="flex flex-col"><span className="text-[10px] text-gray-400 uppercase font-bold">Model</span><span className="text-xs font-mono">{device.model}</span></div>}
-              {device.ip && <div className="flex flex-col"><span className="text-[10px] text-gray-400 uppercase font-bold">IP Adresa</span><span className="text-xs font-mono">{device.ip}</span></div>}
-              {device.mac && <div className="flex flex-col col-span-2 mt-1"><span className="text-[10px] text-gray-400 uppercase font-bold">MAC Adresa</span><span className="text-xs font-mono">{device.mac}</span></div>}
-            </div>
-          )}
 
           {/* Seskupení polí podle kategorií */}
           {['system', 'network', 'wifi', 'ports'].map(category => {
