@@ -13,7 +13,6 @@ import {
   getPhoneSettings,
   getCameraSettings,
   getIoTSettings,
-  getDockerSettings,
   getGenericSettings
 } from './constants';
 
@@ -290,16 +289,15 @@ export const levels: Level[] = [
 
   // --- KAPITOLA 7: Docker & instalace controlleru ---
   {
-    id: '7-1', chapter: 7, title: 'Kontejnerizace sítě',
-    description: 'V moderních profesionálních sítích už nenastavuješ každý prvek (AP, Switch) zvlášť přes webové rozhraní. Používá se centrální "Univo Network Application" (Controller). Ten může běžet buď na vyhrazeném HW (Cloud Key), nebo ho můžeš spustit jako izolovaný kontejner v Dockeru na svém domácím serveru (NAS).',
-    task: 'Vlez do správy Docker Serveru a v sekci kontejnerů zapni "Univo Controller".',
-    explanation: 'Docker umožňuje spouštět aplikace v izolovaných "kontejnerech", které sdílejí jádro systému, ale mají vlastní souborový systém. Je to standard pro moderní domácí automatizaci a správu sítí.',
+    id: '7-1', chapter: 7, title: 'Aktivace Controlleru',
+    description: 'V moderních profesionálních sítích už nenastavuješ každý prvek (AP, Switch) zvlášť přes webové rozhraní. Používá se centrální "Univo Network Application" (Controller). Ten může běžet buď na vyhrazeném HW (Cloud Key), nebo ho můžeš spustit jako službu na svém serveru.',
+    task: 'Vlez do nastavení Univo Controlleru a zapni hlavní systémový přepínač "Systém běží".',
+    explanation: 'Univo Controller (nebo také Network Application) je mozkem celé sítě. Slučuje správu všech zařízení do jednoho přehledného rozhraní. Než začneš adoptovat zařízení, musíš se ujistit, že controller běží.',
     availableTools: [],
     initialDevices: [
-      { id: 'srv', type: 'docker', name: 'Docker Server', position: { x: 40, y: 50}, ports: [{ id: 'eth', type: 'ETH', label: 'LAN' }], data: getDockerSettings({ containerRunning: { type: 'toggle', label: 'Univo Controller (kontejner)', value: false, category: 'system' } }) as any },
-      { id: 'ctl', type: 'server', name: 'Univo Controller', position: { x: 75, y: 50}, ports: [], data: getControllerSettings() as any }
+      { id: 'ctl', type: 'server', name: 'Univo Controller', position: { x: 50, y: 50}, ports: [], data: getControllerSettings({ systemRunning: { type: 'toggle', label: 'Systém běží', value: false, category: 'system' } }) as any }
     ],
-    checkWinCondition: (devices) => !!devices.find(d => d.id === 'srv')?.data?.containerRunning.value
+    checkWinCondition: (devices) => !!devices.find(d => d.id === 'ctl')?.data?.systemRunning.value
   },
   {
     id: '7-2', chapter: 7, title: 'Inform URL: Volání domů',
